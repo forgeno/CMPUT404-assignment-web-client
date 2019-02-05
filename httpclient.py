@@ -86,7 +86,7 @@ class HTTPClient(object):
     def GET(self, url, args=None):
         domainName, urlPath, urlQuery, port = self.parseURL(url)
         self.connect(domainName, port)
-        header = "GET / HTTP/1.0\r\nHost: "+domainName+"\r\nAccept: */*\r\n\r\n"
+        header = "GET "+urlPath+" HTTP/1.0\r\nHost: "+domainName+"\r\nAccept: */*\r\n\r\n"
         self.sendall(header)
         #print("###GET DATA SENT###\nDomain: {}\nPath: {}\nQuery: {}\nPort: {}\nHeader: {}\n".format(domainName, urlPath, urlQuery, port, header))
         print("###GET DATA SENT###\n"+header)
