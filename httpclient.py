@@ -86,7 +86,8 @@ class HTTPClient(object):
     def GET(self, url, args=None):
         domainName, urlPath, urlQuery, port = self.parseURL(url)
         self.connect(domainName, port)
-        header = "GET "+urlPath+" HTTP/1.0\r\nHost: "+domainName+"\r\nAccept: */*\r\n\r\n"
+        fakeUserAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36'
+        header = "GET "+urlPath+urlQuery+" HTTP/1.1\r\nHost: "+domainName+"\r\nAccept: */*\nUser-Agent: "+fakeUserAgent+"\r\n\r\n"
         self.sendall(header)
         #print("###GET DATA SENT###\nDomain: {}\nPath: {}\nQuery: {}\nPort: {}\nHeader: {}\n".format(domainName, urlPath, urlQuery, port, header))
         print("###GET DATA SENT###\n"+header)
@@ -95,10 +96,9 @@ class HTTPClient(object):
         statusCode = self.get_code(parseData)
         htmlBody = self.get_body(returnData)
         htmlHeader = self.get_headers(returnData, urlPath)
-        fullHtml = htmlHeader + htmlBody
-        print("###GET DATA RECIEVED###\n"+returnData)
+        print("###GET DATA RECIEVED###\n"+htmlBody)
         self.close()
-        return HTTPResponse(statusCode, fullHtml)
+        return HTTPResponse(statusCode, htmlBody)
 
     def parseURL(self, url):
         domain = url
@@ -140,7 +140,7 @@ class HTTPClient(object):
         domainName, urlPath, urlQuery, port = self.parseURL(url)
         self.connect(domainName, port)
         fakeUserAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36'
-        header = "POST {} HTTP/1.0\nHost: {}\nConnection: keep-alive\nAccept: */*\nOrigin: {}\nUser-Agent: {}\nAccept-Encoding: gzip, deflate\nAccept-Language: en-US;q=0.9\nContent-Type: application/x-www-form-urlencoded; charset=UTF-8\nContent-Length: {}\r\n\r\n{}".format(urlPath+urlQuery,domainName,url,fakeUserAgent,postBodyLen,postBody)
+        header = "POST {} HTTP/1.1\nHost: {}\nConnection: keep-alive\nAccept: */*\nOrigin: {}\nUser-Agent: {}\nAccept-Encoding: gzip, deflate\nAccept-Language: en-US;q=0.9\nContent-Type: application/x-www-form-urlencoded; charset=UTF-8\nContent-Length: {}\r\n\r\n{}".format(urlPath+urlQuery,domainName,url,fakeUserAgent,postBodyLen,postBody)
         self.sendall(header)
         returnData = self.recvall()
         print("###POST DATA SENT###\n"+header)
@@ -149,10 +149,9 @@ class HTTPClient(object):
         statusCode = self.get_code(parseData)
         htmlBody = self.get_body(returnData)
         htmlHeader = self.get_headers(returnData, urlPath)
-        print("###POST DATA RECIEVED###: \n"+returnData)
-        fullHtml = htmlBody
+        print("###POST DATA RECIEVED###: \n"+htmlBody)
         self.close()
-        return HTTPResponse(statusCode, fullHtml)
+        return HTTPResponse(statusCode, htmlBody)
 
     def command(self, url, command="GET", args=None):
         if (command == "POST"):
